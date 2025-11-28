@@ -1,0 +1,105 @@
+version: "3"
+
+vars:
+  PYTHON: ".venv/bin/python"
+  SERVER_DIR: "apps/server"
+  WEB_CLIENT_DIR: "apps/web"
+  DOCKER_COMPOSE_FILEPATH: "./infra/compose/docker-compose.yaml"
+
+tasks:
+  server:build:
+    desc: "Setup FastAPI server environment"
+    dir: "{{.SERVER_DIR}}"
+    cmds:
+      - python -m venv .venv
+      - .venv/bin/pip install -U pip
+      - .venv/bin/pip install -r requirements.txt
+      - .venv/bin/pip install -e .
+
+  server:dev:
+    desc: "Run FastAPI backend in development mode"
+    dir: "{{.SERVER_DIR}}"
+    cmds:
+      - "{{.PYTHON}} -X dev ./src/server/main.py"
+
+  server:start:
+    desc: "Run FastAPI backend normally"
+    dir: "{{.SERVER_DIR}}"
+    cmds:
+      - "{{.PYTHON}} ./src/server/main.py"
+    deps: [server:build]
+
+  server:clean:
+    desc: "Clean Python caches for backend"
+    dir: "{{.SERVER_DIR}}"
+    cmds:
+      - find . -type d -name "__pycache__" -exec rm -rf {} +
+      - rm -rf dist build *.egg-info
+
+  web:setup:
+    desc: "Install web client dependencies"
+    dir: "{{.WEB_CLIENT_DIR}}"
+    cmds:
+      - npm install
+
+  web:build:
+    desc: "Build Next.js frontend"
+    dir: "{{.WEB_CLIENT_DIR}}"
+    cmds:
+      - bun run build
+
+  web:dev:
+    desc: "Run Next.js frontend in dev mode"
+    dir: "{{.WEB_CLIENT_DIR}}"
+    cmds:
+      - bun run dev
+
+  web:start:
+    desc: "Start Next.js frontend"
+    dir: "{{.WEB_CLIENT_DIR}}"
+    cmds:
+      - bun run start
+    deps: [web:build]
+
+  dev:
+    desc: "Run both backend and frontend"
+    deps: [server:dev, web:dev]
+
+  start:
+    desc: "Start full stack (backend + frontend)"
+    deps: [server:start, web:start]
+
+  infra:up:
+    cmds:
+      - docker-compose -f "{{.DOCKER_COMPOSE_FILEPATH}}" up -d
+      - echo "Infra is up"
+    silent: true
+
+  infra:down:
+    cmds:
+      - docker-compose -f "{{.DOCKER_COMPOSE_FILEPATH}}" down
+      - echo "Infra is down"
+    silent: true
+
+  # windows-specific tasks
+  server:build:windows:
+    desc: "Setup FastAPI server environment (Windows)"
+    dir: "{{.SERVER_DIR}}"
+    cmds:
+      - python -m venv .venv
+      - .venv\Scripts\pip.exe install -U pip
+      - .venv\Scripts\pip.exe install -r requirements.txt
+      - .venv\Scripts\pip.exe install -e .
+
+  server:dev:windows:
+    desc: "Run FastAPI backend in development mode (Windows)"
+    dir: "{{.SERVER_DIR}}"
+    cmds:
+      - ".venv\\Scripts\\python.exe -X dev ./src/server/main.py"
+
+  server:start:windows:
+    desc: "Run FastAPI backend normally (Windows)"
+    dir: "{{.SERVER_DIR}}"
+    cmds:
+      - ".venv\\Scripts\\python.exe ./src/server/main.py"
+    deps: [server:build:windows]

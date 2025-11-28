@@ -1,0 +1,8 @@
+{
+  "venvPath": ".",
+  "venv": ".venv",
+  "typeCheckingMode": "basic",
+  "reportMissingImports": true,
+  "reportUnknownVariableType": false,
+  "reportUnannotatedClassAttribute": false
+}
