@@ -15,6 +15,12 @@ RegNav AI is an AI-powered Regulatory Compliance Navigator designed for the oil 
 
 ---
 
+## 🎥 Demo
+A short walkthrough of RegNav AI showing PDF upload, vector search, and the compliance chatbot: 
+[▶️ Watch Demo](https://drive.google.com/file/d/18GxifnQ6QfjyUFY9tiCCQsazif3UkE6q/view?usp=sharing)
+
+---
+
 ## 🧠 Tech Stack
 
 - **Frontend:** Next.js (TypeScript)  
